@@ -1,3 +1,4 @@
+import os
 from pine_pass import password_to_clipboard
 from pine_pass.indexer import index_passwords
 import gi
@@ -15,7 +16,9 @@ class PinePassApp:
 
         self._index = index_passwords(config['password-store-pass'])
         self._builder = Gtk.Builder()
-        self._builder.add_from_file("./ui.glade")
+        self._assets_path = os.path.join(os.path.dirname(__file__), "../../")
+        glade_file = os.path.join(self._assets_path, 'ui.glade')
+        self._builder.add_from_file(glade_file)
 
     def run(self):
         handlers = {
@@ -27,7 +30,7 @@ class PinePassApp:
         win = self._builder.get_object('main_window')
 
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path("ui.css")
+        style_provider.load_from_path(os.path.join(self._assets_path, "ui.css"))
 
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(),

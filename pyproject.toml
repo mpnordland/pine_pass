@@ -3,7 +3,7 @@ requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.scripts]
-pine_pass = "pine_pass.gui"
+pinepass = "pine_pass.gui:start_app"
 
 [tool.flit.metadata]
 module = "pine_pass"
