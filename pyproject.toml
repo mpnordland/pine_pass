@@ -2,6 +2,9 @@
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
 
+[tool.flit.scripts]
+pine_pass = "pine_pass.gui"
+
 [tool.flit.metadata]
 module = "pine_pass"
 author = "Micah Nordland"
