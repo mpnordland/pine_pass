@@ -2,8 +2,10 @@ from pine_pass.indexer import index_passwords
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GLib
 
+
+from .widgets import PasswordRow
 
 
 class PinePassApp:
@@ -18,9 +20,20 @@ class PinePassApp:
         handlers = {
             "gtk_main_quit": Gtk.main_quit,
             "on_password_search_changed": self.update_search_results,
+            "password_row_activated": self.copy_password,
         }
         self._builder.connect_signals(handlers)
         win = self._builder.get_object('main_window')
+
+        style_provider = Gtk.CssProvider()
+        style_provider.load_from_path("ui.css")
+
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
         win.show_all()
         Gtk.main()
 
@@ -31,8 +44,20 @@ class PinePassApp:
             list_box.foreach(lambda child: list_box.remove(child))
 
             for result in results:
-                row = Gtk.ListBoxRow()
-                row.add(Gtk.Label(label=result))
-                list_box.add(row)
+                list_box.add(PasswordRow(result))
             
             list_box.show_all()
+
+    def copy_password(self, list_box, row):
+        revealer = self._builder.get_object("revealer")
+        password_label = self._builder.get_object("notification-password-name")
+
+        password_label.set_text(row.entry)
+        revealer.set_reveal_child(True)
+
+        GLib.timeout_add(2000, self.hide_notification, None)
+
+    def hide_notification(self, what):
+        revealer = self._builder.get_object("revealer")
+        revealer.set_reveal_child(False)
+        return False
