@@ -1,3 +1,4 @@
+from pine_pass import password_to_clipboard
 from pine_pass.indexer import index_passwords
 import gi
 
@@ -45,7 +46,7 @@ class PinePassApp:
 
             for result in results:
                 list_box.add(PasswordRow(result))
-            
+          
             list_box.show_all()
 
     def copy_password(self, list_box, row):
@@ -54,6 +55,7 @@ class PinePassApp:
 
         password_label.set_text(row.entry)
         revealer.set_reveal_child(True)
+        password_to_clipboard(row.entry)
 
         GLib.timeout_add(2000, self.hide_notification, None)
 

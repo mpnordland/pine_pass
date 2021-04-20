@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 
+
 class PasswordIndex:
     def __init__(self):
         self._index = defaultdict(list)
@@ -10,10 +11,8 @@ class PasswordIndex:
         if sort:
             self.sort()
 
-
     def sort(self):
-        self._index = defaultdict(list, [ (key, self._index[key]) for key in sorted(self._index.keys())])
-
+        self._index = defaultdict(list, [(key, self._index[key]) for key in sorted(self._index.keys())])
 
     def lookup(self, key):
         key = key.lower()
@@ -25,7 +24,7 @@ class PasswordIndex:
                 result.extend(paths)
             elif matched:
                 break
-        
+
         return result
 
 
@@ -37,7 +36,8 @@ def index_passwords(path="~/.password-store/"):
         if '.git' in dirnames:
             dirnames.remove('.git')
         for filename in filter(lambda fname: not fname.startswith('.'), filenames):
-            index.insert(filename.strip(".gpg").lower(), os.path.join(dirpath, filename), False)
+            filename = filename.strip(".gpg")
+            index.insert(filename.lower(), os.path.join(dirpath, filename).replace(path, ''), False)
 
     index.sort()
     return index
