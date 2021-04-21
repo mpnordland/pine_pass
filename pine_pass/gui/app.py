@@ -16,7 +16,7 @@ class PinePassApp:
 
         self._index = index_passwords(config['password-store-pass'])
         self._builder = Gtk.Builder()
-        self._assets_path = os.path.join(os.path.dirname(__file__), "../../")
+        self._assets_path = os.path.dirname(__file__)
         glade_file = os.path.join(self._assets_path, 'ui.glade')
         self._builder.add_from_file(glade_file)
 
