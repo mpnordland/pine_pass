@@ -1,0 +1,4 @@
+[Desktop Entry]
+Exec=/home/micah/.local/bin/pinepass
+Name=pinepass
+Type=Application
