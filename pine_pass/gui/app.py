@@ -1,5 +1,6 @@
 import os
-from pine_pass import password_to_clipboard
+from pine_pass import password_to_clipboard, sync_passwords
+from .widgets import PasswordRow
 from pine_pass.indexer import index_passwords
 import gi
 
@@ -7,14 +8,12 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib
 
 
-from .widgets import PasswordRow
-
-
 class PinePassApp:
 
     def __init__(self, config):
 
-        self._index = index_passwords(config['password-store-pass'])
+        self._config = config
+        self.reindex_passwords()
         self._builder = Gtk.Builder()
         self._assets_path = os.path.dirname(__file__)
         glade_file = os.path.join(self._assets_path, 'ui.glade')
@@ -25,6 +24,7 @@ class PinePassApp:
             "gtk_main_quit": Gtk.main_quit,
             "on_password_search_changed": self.update_search_results,
             "password_row_activated": self.copy_password,
+            "on_refresh_button_clicked": self.refresh_passwords,
         }
         self._builder.connect_signals(handlers)
         win = self._builder.get_object('main_window')
@@ -49,12 +49,12 @@ class PinePassApp:
 
             for result in results:
                 list_box.add(PasswordRow(result))
-          
+
             list_box.show_all()
 
     def copy_password(self, list_box, row):
         revealer = self._builder.get_object("revealer")
-        password_label = self._builder.get_object("notification-password-name")
+        password_label = self._builder.get_object("notification_password_name")
 
         password_label.set_text(row.entry)
         revealer.set_reveal_child(True)
@@ -66,3 +66,12 @@ class PinePassApp:
         revealer = self._builder.get_object("revealer")
         revealer.set_reveal_child(False)
         return False
+
+    def refresh_passwords(self, button):
+        # TODO: make search and results inactive while refresh is happening
+        sync_passwords()
+        self.reindex_passwords()
+
+    def reindex_passwords(self):
+        self._index = index_passwords(self._config['password-store-pass'])
+
