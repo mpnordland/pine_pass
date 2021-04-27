@@ -6,6 +6,8 @@ with most Linux distros.
 
 ## Current Features
 
+Can search through passwords in repository and copy the password to the clipboard
+
 ## Requirements
 Python
 Python GObject introspection bindings
