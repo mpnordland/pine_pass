@@ -2,8 +2,34 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
+  <object class="GtkMenu" id="menu1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkImageMenuItem" id="refresh_menu_item">
+        <property name="label">gtk-refresh</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="tooltip-text" translatable="yes">Sync passwords through git and refresh UI</property>
+        <property name="use-underline">True</property>
+        <property name="use-stock">True</property>
+        <signal name="activate" handler="on_refresh_menu_item_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkImageMenuItem" id="prefs_menu_item">
+        <property name="label">gtk-preferences</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <property name="use-underline">True</property>
+        <property name="use-stock">True</property>
+        <signal name="activate" handler="on_prefs_menu_item_activate" swapped="no"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="can-focus">False</property>
+    <property name="icon-name">dialog-password</property>
     <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
     <child>
       <object class="GtkOverlay">
@@ -16,7 +42,7 @@
             <property name="is-focus">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkBox" id="box1">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
@@ -35,13 +61,20 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="refresh_button">
-                    <property name="label">gtk-refresh</property>
+                  <object class="GtkMenuButton" id="primary_menu_button">
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
+                    <property name="focus-on-click">False</property>
                     <property name="receives-default">True</property>
-                    <property name="use-stock">True</property>
-                    <signal name="clicked" handler="on_refresh_button_clicked" swapped="no"/>
+                    <property name="popup">menu1</property>
+                    <property name="use-popover">False</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="icon-name">open-menu-symbolic</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -120,7 +153,8 @@
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="label" translatable="yes">Copied Password</property>
+                        <property name="label" translatable="yes">Password copied to clipboard. It will be cleared in 45 seconds.</property>
+                        <property name="wrap">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

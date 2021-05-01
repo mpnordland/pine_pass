@@ -7,8 +7,12 @@ import subprocess
 __version__ = "0.0.2"
 
 
-def password_to_clipboard(password_path):
-    subprocess.run(['pass', '-c', password_path])
+def get_password(password_path):
+    result = subprocess.run(['pass', password_path], text=True, capture_output=True)
+    if result.returncode == 0 and result.stdout:
+        return result.stdout.splitlines()[0]
+
+    return None
 
 
 def sync_passwords():
