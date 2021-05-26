@@ -189,4 +189,195 @@
       </object>
     </child>
   </object>
+  <object class="GtkDialog" id="preferences_dialog">
+    <property name="can-focus">False</property>
+    <property name="default-width">500</property>
+    <property name="type-hint">dialog</property>
+    <property name="transient-for">main_window</property>
+    <property name="attached-to">main_window</property>
+    <child internal-child="vbox">
+      <object class="GtkBox">
+        <property name="can-focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox">
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
+            <child>
+              <object class="GtkButton" id="button1">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="use-stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">10</property>
+            <property name="margin-end">10</property>
+            <property name="margin-top">10</property>
+            <property name="margin-bottom">5</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">10</property>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="baseline-position">top</property>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">5</property>
+                    <property name="label" translatable="yes">Repository URL</property>
+                    <property name="xalign">0</property>
+                    <accessibility>
+                      <relation type="label-for" target="repo_url"/>
+                    </accessibility>
+                    <child internal-child="accessible">
+                      <object class="AtkObject" id="label2-atkobject">
+                        <property name="AtkObject::accessible-role" translatable="yes">label</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="repo_url">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="input-purpose">url</property>
+                    <accessibility>
+                      <relation type="labelled-by" target="label2"/>
+                    </accessibility>
+                    <child internal-child="accessible">
+                      <object class="AtkObject" id="repo_url-atkobject">
+                        <property name="AtkObject::accessible-role" translatable="yes">text</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <property name="baseline-position">top</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="xpad">5</property>
+                    <property name="label" translatable="yes">GPG Key ID</property>
+                    <property name="xalign">0</property>
+                    <accessibility>
+                      <relation type="label-for" target="gpg_key_id"/>
+                    </accessibility>
+                    <child internal-child="accessible">
+                      <object class="AtkObject" id="label1-atkobject">
+                        <property name="AtkObject::accessible-role" translatable="yes">label</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="gpg_key_id">
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <accessibility>
+                      <relation type="labelled-by" target="label1"/>
+                    </accessibility>
+                    <child internal-child="accessible">
+                      <object class="AtkObject" id="gpg_key_id-atkobject">
+                        <property name="AtkObject::accessible-role" translatable="yes">text</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="-6">button1</action-widget>
+      <action-widget response="-10">button2</action-widget>
+    </action-widgets>
+  </object>
 </interface>

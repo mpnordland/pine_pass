@@ -27,8 +27,8 @@ flit build
 Installing the built package will add the pinepass command.
 
 ## TODO
+* Add settings screen/wizard for setting up from scratch
+* Add button and screen to add/generate new passwords
+* Add support for pass-otp extension
 * Figure out how to add .desktop file to allow opening from launchers.
 * Add screen to show all info in password file
-* Add button and screen to add/generate new passwords
-* Add settings screen/wizard for setting up from scratch
-* Make refresh button not freeze UI
