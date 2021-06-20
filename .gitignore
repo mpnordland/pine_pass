@@ -139,4 +139,5 @@ cython_debug/
 
 *.glade~
 
+\#ui.glade\#
 .vscode
