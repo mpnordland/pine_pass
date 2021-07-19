@@ -120,5 +120,5 @@ def get_available_gpg_keys():
     where a private key is available for decryption
     """
     gpg = gnupg.GPG()
-    private_keys = gpg.list_keys(True)
+    private_keys = gpg.list_keys(True) # Gets private keys
     return list(filter(lambda key: "e" in key["cap"].lower(), private_keys))

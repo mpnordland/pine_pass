@@ -101,10 +101,16 @@ class PinePassApp:
         current_key_ids = get_key_ids(self._config["password-store-path"])
 
         repo_url_entry = self._builder.get_object("repo_url")
-        key_id_entry = self._builder.get_object("gpg_key_id")
 
         repo_url_entry.set_text(current_repo_remote or "")
-        key_id_entry.set_text(",".join(current_key_ids))
+
+        list_box = self._builder.get_object("repository_keys")
+        list_box.foreach(lambda child: list_box.remove(child))
+
+        for key_id in current_key_ids:
+            list_box.add(Gtk.Label(label=key_id))
+
+        list_box.show_all()
 
         response = dialog.run()
         if response == Gtk.ResponseType.APPLY:

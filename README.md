@@ -35,6 +35,10 @@ Installing the built package will add the pinepass command.
 * Add screen to show all info in password file
 
 ### Plan for wizard
+
+Decided not to use GtkAssistant because getting it to work with Glade was slowing me down.
+Going to try to make settings dialog cover my cases. Probably easier/more flexible for users too.
+
 Step 1 checks for existing ssh keys and offers to generate one if
 it doesn't exist.
 
