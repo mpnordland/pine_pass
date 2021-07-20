@@ -8,15 +8,16 @@ from pine_pass import (
     get_key_ids,
     update_remote_url,
     clone_from_remote,
+    get_available_gpg_keys,
 )
 
-from .widgets import PasswordRow
+from .widgets import PasswordRow, KeyIdRow
 from pine_pass.indexer import index_passwords
 import gi
 
 gi.require_version("Gtk", "3.0")
-from gi.repository import Gtk, Gdk, GLib
 
+from gi.repository import Gtk, Gdk, GLib
 
 class PinePassApp:
     def __init__(self, config):
@@ -42,7 +43,8 @@ class PinePassApp:
         self._builder.connect_signals(handlers)
 
         style_provider = Gtk.CssProvider()
-        style_provider.load_from_path(os.path.join(self._assets_path, "ui.css"))
+        style_provider.load_from_path(
+            os.path.join(self._assets_path, "ui.css"))
 
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(),
@@ -70,12 +72,14 @@ class PinePassApp:
         if password:
             self._clipboard.set_text(password, -1)
             revealer = self._builder.get_object("revealer")
-            password_label = self._builder.get_object("notification_password_name")
+            password_label = self._builder.get_object(
+                "notification_password_name")
 
             password_label.set_text(row.entry)
             revealer.set_reveal_child(True)
             GLib.timeout_add_seconds(2, self.hide_notification, None)
-            GLib.timeout_add_seconds(45, lambda _: self._clipboard.clear(), None)
+            GLib.timeout_add_seconds(
+                45, lambda _: self._clipboard.clear(), None)
 
     def hide_notification(self, what):
         revealer = self._builder.get_object("revealer")
@@ -108,9 +112,40 @@ class PinePassApp:
         list_box.foreach(lambda child: list_box.remove(child))
 
         for key_id in current_key_ids:
-            list_box.add(Gtk.Label(label=key_id))
+            list_box.add(KeyIdRow(key_id))
 
         list_box.show_all()
+
+        available_keys = self._builder.get_object("available_keys")
+        add_key_button = self._builder.get_object("add_key_button")
+
+        private_keys = get_available_gpg_keys()
+        def key_filter(key):
+            for cur_key in current_key_ids:
+                if f"<{cur_key}>" in key['uids'][0] or key['fingerprint'].endswith(cur_key):
+                    return False
+            return True
+
+        for key in filter(key_filter,private_keys):
+            available_keys.append_text(key['uids'][0])
+        
+        if len(available_keys.get_model()) < 1:
+            available_keys.set_sensitive(False)
+            add_key_button.set_sensitive(False)
+            available_keys.append_text("No keys can be added")
+            available_keys.set_active(0)
+
+
+        
+
+
+        def remove_selected_key(button):
+            row = list_box.get_selected_row()
+            if row is not None:
+                list_box.remove(row)
+
+        remove_key_button = self._builder.get_object("remove_key_button")
+        remove_key_button.connect('clicked', remove_selected_key)
 
         response = dialog.run()
         if response == Gtk.ResponseType.APPLY:
@@ -125,7 +160,8 @@ class PinePassApp:
             if check_for_password_store():
                 update_remote_url(new_repo_remote)
             else:  # otherwise clone from remote server
-                clone_from_remote(new_repo_remote, self._config["password-store-path"])
+                clone_from_remote(
+                    new_repo_remote, self._config["password-store-path"])
 
         else:
             pass

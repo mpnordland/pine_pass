@@ -4,7 +4,7 @@
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkListStore" id="key_id_store">
     <columns>
-      <!-- column-name Key ID -->
+      <!-- column-name Key -->
       <column type="gchararray"/>
     </columns>
     <data>
@@ -358,11 +358,12 @@
                 </child>
                 <child>
                   <object class="GtkListBox" id="repository_keys">
+                    <property name="height-request">60</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
+                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
@@ -373,10 +374,9 @@
                     <property name="can-focus">False</property>
                     <property name="spacing">7</property>
                     <child>
-                      <object class="GtkComboBox" id="available_keys">
+                      <object class="GtkComboBoxText" id="available_keys">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="model">key_id_store</property>
                       </object>
                       <packing>
                         <property name="expand">True</property>

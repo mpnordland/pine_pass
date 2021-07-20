@@ -11,3 +11,12 @@ class PasswordRow(Gtk.ListBoxRow):
         label = Gtk.Label(label=password_entry)
         label.props.halign = Gtk.Align.START
         self.add(label)
+
+
+class KeyIdRow(Gtk.ListBoxRow):
+    def __init__(self, key_id):
+        super(Gtk.ListBoxRow, self).__init__()
+        self.key_id = key_id
+        label = Gtk.Label(label=key_id)
+        label.props.halign = Gtk.Align.START
+        self.add(label)
