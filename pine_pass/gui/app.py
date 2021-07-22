@@ -87,13 +87,27 @@ class PinePassApp:
         return False
 
     def refresh_passwords(self, button):
-        def refresh_thread():
-            sync_passwords()
-            GLib.idle_add(self.reindex_passwords)
+        self.run_background_task(sync_passwords).done(lambda _: self.reindex_passwords())
 
-        thread = threading.Thread(target=refresh_thread)
+    def run_background_task(self, task):
+        def _resolver(resolve, reject):
+            def _inner_task():
+                try:
+                    result = task()
+                    def _inner_callback():
+                        resolve(result)
+                        return False
+                    GLib.idle_add(_inner_callback)
+                except Exception as e:
+                    reject(e)
+
+            thread = threading.Thread(target=_inner_task)
         thread.daemon = True
         thread.start()
+
+
+        return Promise(_resolver)
+
 
     def reindex_passwords(self):
         self._index = index_passwords(self._config["password-store-path"])

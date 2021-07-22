@@ -15,6 +15,7 @@ Can search through passwords in repository and copy the password to the clipboar
 * GTK 3
 * pass
 * python-gnupg
+* python-promise
 
 ## Build instructions
 
