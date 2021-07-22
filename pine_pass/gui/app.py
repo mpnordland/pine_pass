@@ -1,5 +1,6 @@
 import os
 import threading
+from promise import Promise
 from pine_pass import (
     get_password,
     sync_passwords,
@@ -102,8 +103,8 @@ class PinePassApp:
                     reject(e)
 
             thread = threading.Thread(target=_inner_task)
-        thread.daemon = True
-        thread.start()
+            thread.daemon = True
+            thread.start()
 
 
         return Promise(_resolver)
@@ -130,36 +131,66 @@ class PinePassApp:
 
         list_box.show_all()
 
+
         available_keys = self._builder.get_object("available_keys")
         add_key_button = self._builder.get_object("add_key_button")
+        remove_key_button = self._builder.get_object("remove_key_button")
 
-        private_keys = get_available_gpg_keys()
-        def key_filter(key):
-            for cur_key in current_key_ids:
-                if f"<{cur_key}>" in key['uids'][0] or key['fingerprint'].endswith(cur_key):
-                    return False
-            return True
+        list_box.connect('row-activated', lambda _, __: remove_key_button.set_sensitive(True))
+        list_box.connect('unselect-all', lambda _: remove_key_button.set_sensitive(False))
 
-        for key in filter(key_filter,private_keys):
-            available_keys.append_text(key['uids'][0])
-        
-        if len(available_keys.get_model()) < 1:
-            available_keys.set_sensitive(False)
-            add_key_button.set_sensitive(False)
-            available_keys.append_text("No keys can be added")
-            available_keys.set_active(0)
+        def get_unused_available_keys(used_keys) :
+            private_keys = get_available_gpg_keys()
+            def key_filter(key):
+                for cur_key in used_keys:
+                    if f"<{cur_key}>" in key['uids'][0] or key['fingerprint'].endswith(cur_key):
+                        return False
+                return True
 
+            return [ key['fingerprint'] for key in filter(key_filter,private_keys)]
+            
+        def update_available_keys(usable_keys):
+            available_keys.remove_all()
 
-        
+            if usable_keys:
+                for key in usable_keys:
+                    available_keys.append_text(key)
+                add_key_button.set_sensitive(True)
+                available_keys.set_sensitive(True)
+
+            else:
+                available_keys.set_sensitive(False)
+                add_key_button.set_sensitive(False)
+                available_keys.append_text("No keys can be added")
+                available_keys.set_active(0)
+
+        self.run_background_task(lambda: get_unused_available_keys(current_key_ids)).done(update_available_keys, print)
+
 
 
         def remove_selected_key(button):
             row = list_box.get_selected_row()
             if row is not None:
                 list_box.remove(row)
+                remove_key_button.set_sensitive(False)
 
-        remove_key_button = self._builder.get_object("remove_key_button")
+                used_key_ids = []
+                list_box.foreach(lambda child: used_key_ids.append(child.key_id))
+                self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys, print)
+
         remove_key_button.connect('clicked', remove_selected_key)
+            
+        def add_selected_key(button):
+            key_id = available_keys.get_active_text()
+            if key_id is not None:
+                list_box.add(KeyIdRow(key_id))
+                used_key_ids = []
+                list_box.show_all()
+                list_box.foreach(lambda child: used_key_ids.append(child.key_id))
+                self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys)
+        
+        add_key_button.connect('clicked', add_selected_key)
+
 
         response = dialog.run()
         if response == Gtk.ResponseType.APPLY:
