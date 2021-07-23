@@ -89,7 +89,7 @@ def generate_ssh_keypair(key_type="rsa"):
     Generates id_rsa and id_rsa.pub using ssh-keygen
     Uses default location!! Might overwrite existing keys!
     """
-    command = ["ssh-keygen", "-t", key_type, "-f", os.path.expanduser("~/.ssh/id_rsa")]
+    command = ["ssh-keygen", "-t", key_type, "-f", os.path.expanduser("~/.ssh/id_" + key_type)]
     subprocess.run(command)
 
 

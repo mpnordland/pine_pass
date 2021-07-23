@@ -11,6 +11,8 @@ from pine_pass import (
     clone_from_remote,
     get_available_gpg_keys,
     update_key_ids,
+    get_ssh_pub_keys,
+    generate_ssh_keypair,
 )
 
 from .widgets import PasswordRow, KeyIdRow
@@ -197,6 +199,34 @@ class PinePassApp:
                 self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys)
         
         add_key_button.connect('clicked', add_selected_key)
+
+
+
+        # SSH management
+        generate_ssh_key_button = self._builder.get_object('generate_ssh_key_button')
+        public_key_box = self._builder.get_object('public_key')
+
+        def update_ssh_widgets(ssh_keys):
+            if ssh_keys:
+                public_key_box.get_buffer().set_text("\n".join(ssh_keys))
+                public_key_box.show()
+                generate_ssh_key_button.hide()
+            else:
+                public_key_box.hide()
+                generate_ssh_key_button.show()
+
+        
+
+        def run_ssh_keygen_and_update():
+           self.run_background_task(generate_ssh_keypair).done(lambda _: update_ssh_widgets(get_ssh_pub_keys()))
+
+        generate_ssh_key_button.connect('clicked', run_ssh_keygen_and_update)
+
+
+        update_ssh_widgets(get_ssh_pub_keys())
+
+
+
 
 
         response = dialog.run()
