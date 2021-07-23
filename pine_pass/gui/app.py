@@ -1,6 +1,4 @@
 import os
-import threading
-from promise import Promise
 from pine_pass import (
     get_password,
     sync_passwords,
@@ -15,7 +13,7 @@ from pine_pass import (
     generate_ssh_keypair,
 )
 
-from .widgets import PasswordRow, KeyIdRow
+from .background import run_background_task
 from pine_pass.indexer import index_passwords
 import gi
 
@@ -91,26 +89,11 @@ class PinePassApp:
         return False
 
     def refresh_passwords(self, button):
-        self.run_background_task(sync_passwords).done(lambda _: self.reindex_passwords())
-
-    def run_background_task(self, task):
-        def _resolver(resolve, reject):
-            def _inner_task():
-                try:
-                    result = task()
-                    def _inner_callback():
-                        resolve(result)
-                        return False
-                    GLib.idle_add(_inner_callback)
-                except Exception as e:
-                    reject(e)
-
-            thread = threading.Thread(target=_inner_task)
-            thread.daemon = True
-            thread.start()
+        run_background_task(sync_passwords).done(lambda _: self.reindex_passwords())
 
 
-        return Promise(_resolver)
+
+
 
 
     def reindex_passwords(self):
@@ -173,7 +156,7 @@ class PinePassApp:
                 available_keys.append_text("No keys can be added")
                 available_keys.set_active(0)
 
-        self.run_background_task(lambda: get_unused_available_keys(current_key_ids)).done(update_available_keys, print)
+        run_background_task(lambda: get_unused_available_keys(current_key_ids)).done(update_available_keys, print)
 
 
 
@@ -185,7 +168,7 @@ class PinePassApp:
 
                 used_key_ids = []
                 gpg_key_box.foreach(lambda child: used_key_ids.append(child.key_id))
-                self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys, print)
+                run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys, print)
 
         remove_key_button.connect('clicked', remove_selected_key)
             
@@ -196,7 +179,7 @@ class PinePassApp:
                 used_key_ids = []
                 gpg_key_box.show_all()
                 gpg_key_box.foreach(lambda child: used_key_ids.append(child.key_id))
-                self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys)
+                run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys)
         
         add_key_button.connect('clicked', add_selected_key)
 
@@ -218,15 +201,12 @@ class PinePassApp:
         
 
         def run_ssh_keygen_and_update():
-           self.run_background_task(generate_ssh_keypair).done(lambda _: update_ssh_widgets(get_ssh_pub_keys()))
+           run_background_task(generate_ssh_keypair).done(lambda _: update_ssh_widgets(get_ssh_pub_keys()))
 
         generate_ssh_key_button.connect('clicked', run_ssh_keygen_and_update)
 
 
         update_ssh_widgets(get_ssh_pub_keys())
-
-
-
 
 
         response = dialog.run()
@@ -239,7 +219,7 @@ class PinePassApp:
 
             # the keys have changed
             if set(current_key_ids) != set(new_key_ids):
-                self.run_background_task(lambda: update_key_ids(new_key_ids)).done(lambda _: self.reindex_passwords())
+                run_background_task(lambda: update_key_ids(new_key_ids)).done(lambda _: self.reindex_passwords())
 
             # if repository exists, update git repo remote
             if check_for_password_store():
