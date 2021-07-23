@@ -10,6 +10,7 @@ from pine_pass import (
     update_remote_url,
     clone_from_remote,
     get_available_gpg_keys,
+    update_key_ids,
 )
 
 from .widgets import PasswordRow, KeyIdRow
@@ -116,28 +117,34 @@ class PinePassApp:
     def show_preferences(self, menu_item):
         dialog = self._builder.get_object("preferences_dialog")
 
+        # git repo management
         current_repo_remote = get_respository_remote()
-        current_key_ids = get_key_ids(self._config["password-store-path"])
 
         repo_url_entry = self._builder.get_object("repo_url")
 
         repo_url_entry.set_text(current_repo_remote or "")
 
-        list_box = self._builder.get_object("repository_keys")
-        list_box.foreach(lambda child: list_box.remove(child))
+
+        # GPG Key management
+        current_key_ids = get_key_ids(self._config["password-store-path"])
+        gpg_key_box = self._builder.get_object("repository_keys")
+        gpg_key_box.foreach(lambda child: gpg_key_box.remove(child))
 
         for key_id in current_key_ids:
-            list_box.add(KeyIdRow(key_id))
+            gpg_key_box.add(KeyIdRow(key_id))
 
-        list_box.show_all()
+        gpg_key_box.show_all()
 
 
         available_keys = self._builder.get_object("available_keys")
         add_key_button = self._builder.get_object("add_key_button")
         remove_key_button = self._builder.get_object("remove_key_button")
 
-        list_box.connect('row-activated', lambda _, __: remove_key_button.set_sensitive(True))
-        list_box.connect('unselect-all', lambda _: remove_key_button.set_sensitive(False))
+        gpg_key_box.connect('row-activated', lambda _, __: remove_key_button.set_sensitive(True))
+        gpg_key_box.connect('unselect-all', lambda _: remove_key_button.set_sensitive(False))
+
+
+
 
         def get_unused_available_keys(used_keys) :
             private_keys = get_available_gpg_keys()
@@ -169,13 +176,13 @@ class PinePassApp:
 
 
         def remove_selected_key(button):
-            row = list_box.get_selected_row()
+            row = gpg_key_box.get_selected_row()
             if row is not None:
-                list_box.remove(row)
+                gpg_key_box.remove(row)
                 remove_key_button.set_sensitive(False)
 
                 used_key_ids = []
-                list_box.foreach(lambda child: used_key_ids.append(child.key_id))
+                gpg_key_box.foreach(lambda child: used_key_ids.append(child.key_id))
                 self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys, print)
 
         remove_key_button.connect('clicked', remove_selected_key)
@@ -183,10 +190,10 @@ class PinePassApp:
         def add_selected_key(button):
             key_id = available_keys.get_active_text()
             if key_id is not None:
-                list_box.add(KeyIdRow(key_id))
+                gpg_key_box.add(KeyIdRow(key_id))
                 used_key_ids = []
-                list_box.show_all()
-                list_box.foreach(lambda child: used_key_ids.append(child.key_id))
+                gpg_key_box.show_all()
+                gpg_key_box.foreach(lambda child: used_key_ids.append(child.key_id))
                 self.run_background_task(lambda: get_unused_available_keys(used_key_ids)).done(update_available_keys)
         
         add_key_button.connect('clicked', add_selected_key)
@@ -196,10 +203,13 @@ class PinePassApp:
         if response == Gtk.ResponseType.APPLY:
             new_repo_remote = repo_url_entry.get_text()
 
-            # TODO: manage key ids something like this:
-            # new_key_ids = [id.strip() for id in key_id_entry.get_text().split(",")]
-            # we assume that duplicate key id's aren't useful
-            # if set(current_key_ids) == set(new_key_ids):
+            new_key_ids = []
+            gpg_key_box.show_all()
+            gpg_key_box.foreach(lambda child: new_key_ids.append(child.key_id))
+
+            # the keys have changed
+            if set(current_key_ids) != set(new_key_ids):
+                self.run_background_task(lambda: update_key_ids(new_key_ids)).done(lambda _: self.reindex_passwords())
 
             # if repository exists, update git repo remote
             if check_for_password_store():
