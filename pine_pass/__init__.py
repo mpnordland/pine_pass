@@ -10,18 +10,39 @@ import gnupg
 __version__ = "0.0.2"
 
 
-def get_password(password_path):
-    result = subprocess.run(["pass", password_path], text=True, capture_output=True)
+def get_password_entry(password_path):
+    result = subprocess.run(["pass", password_path],
+                            text=True, capture_output=True)
     if result.returncode == 0 and result.stdout:
-        return result.stdout.splitlines()[0]
+        return result.stdout
 
     return None
 
+def get_password(password_path):
+    result = get_password_entry(password_path)
+    if result:
+        return result.splitlines()[0]
 
-def sync_passwords():
-    subprocess.run(["pass", "git", "pull", "--no-edit"])
-    subprocess.run(["pass", "git", "push"])
+    return None
 
+def check_for_password_store():
+    result = subprocess.run(["pass"], text=True, capture_output=True)
+    print(result.returncode)
+    if result.returncode == 0 and "password store is empty" not in result.stdout:
+        return True
+    return False
+
+# repository management
+
+def update_remote_url(remote_url):
+
+    command = ["pass", "git", "remote" "set-url", "origin", remote_url]
+    subprocess.run(command)
+
+
+def clone_from_remote(remote_url, password_store_path):
+    command = ["git", "clone", remote_url, password_store_path]
+    subprocess.run(command)
 
 def get_respository_remote():
     result = subprocess.run(
@@ -31,6 +52,12 @@ def get_respository_remote():
         return result.stdout.strip()
     return None
 
+def sync_passwords():
+    subprocess.run(["pass", "git", "pull", "--no-edit"])
+    subprocess.run(["pass", "git", "push"])
+
+
+# Key Management
 
 def get_key_ids(repository_path):
     try:
@@ -52,25 +79,6 @@ def update_key_ids(key_ids, sub_folder=None):
     subprocess.run(command)
 
 
-def check_for_password_store():
-    result = subprocess.run(["pass"], text=True, capture_output=True)
-    print(result.returncode)
-    if result.returncode == 0 and "password store is empty" not in result.stdout:
-        return True
-    return False
-
-
-def update_remote_url(remote_url):
-
-    command = ["pass", "git", "remote" "set-url", "origin", remote_url]
-    subprocess.run(command)
-
-
-def clone_from_remote(remote_url, password_store_path):
-    command = ["git", "clone", remote_url, password_store_path]
-    subprocess.run(command)
-
-
 def get_ssh_pub_keys():
     """
     Get any registered SSH identities
@@ -89,7 +97,8 @@ def generate_ssh_keypair(key_type="rsa"):
     Generates id_rsa and id_rsa.pub using ssh-keygen
     Uses default location!! Might overwrite existing keys!
     """
-    command = ["ssh-keygen", "-t", key_type, "-f", os.path.expanduser("~/.ssh/id_" + key_type)]
+    command = ["ssh-keygen", "-t", key_type, "-f",
+               os.path.expanduser("~/.ssh/id_" + key_type)]
     subprocess.run(command)
 
 
@@ -120,5 +129,5 @@ def get_available_gpg_keys():
     where a private key is available for decryption
     """
     gpg = gnupg.GPG()
-    private_keys = gpg.list_keys(True) # Gets private keys
+    private_keys = gpg.list_keys(True)  # Gets private keys
     return list(filter(lambda key: "e" in key["cap"].lower(), private_keys))

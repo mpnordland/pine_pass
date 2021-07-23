@@ -11,8 +11,10 @@ from pine_pass import (
     update_key_ids,
     get_ssh_pub_keys,
     generate_ssh_keypair,
+    get_password_entry,
 )
 
+from .widgets import PasswordRow, KeyIdRow, PasswordEditDialog
 from .background import run_background_task
 from pine_pass.indexer import index_passwords
 import gi
@@ -64,7 +66,9 @@ class PinePassApp:
             list_box.foreach(lambda child: list_box.remove(child))
 
             for result in results:
-                list_box.add(PasswordRow(result))
+                row = PasswordRow(result)
+                row.set_button_callback(lambda _: self.show_password_edit(result))
+                list_box.add(row)
 
             list_box.show_all()
 
@@ -98,6 +102,20 @@ class PinePassApp:
 
     def reindex_passwords(self):
         self._index = index_passwords(self._config["password-store-path"])
+
+    def show_password_edit(self, password_path):
+        password_entry = get_password_entry(password_path)
+
+        dialog = PasswordEditDialog(password_path, password_entry, self._window)
+
+        response = dialog.run()
+
+
+        if response == Gtk.ResponseType.APPLY:
+            pass
+        else:
+            pass
+
 
     def show_preferences(self, menu_item):
         dialog = self._builder.get_object("preferences_dialog")
