@@ -25,6 +25,15 @@ def get_password(password_path):
 
     return None
 
+def write_password_entry(password_path, password_entry):
+    """
+    Writes password back to file. Will overwrite existing entries.
+    """
+    command = ["pass", "insert", "--multiline", "--force", password_path]
+    subprocess.run(command, input=password_entry,
+                            text=True, capture_output=True)
+
+
 def check_for_password_store():
     result = subprocess.run(["pass"], text=True, capture_output=True)
     print(result.returncode)

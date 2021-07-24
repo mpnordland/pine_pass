@@ -6,7 +6,11 @@ with most Linux distros.
 
 ## Current Features
 
-Can search through passwords in repository and copy the password to the clipboard
+* Can search through passwords in repository and copy the password to the clipboard
+* Can display/edit passwords
+* Can insert new passwords (can't generate passwords yet!)
+* Has a preference screen that can handle simple repository and gpg key id management
+* Shows you the first SSH key it found or offers to generate one (only generates RSA keys right now, uses ssh-keygen)
 
 ## Requirements
 
@@ -16,6 +20,13 @@ Can search through passwords in repository and copy the password to the clipboar
 * pass
 * python-gnupg
 * python-promise
+* ssh-add
+* ssh-keygen
+
+
+## No Maintenance Guarantee!
+
+I promise not to maintain Pine Pass. If I do maintain it, you can pipe a request to `/dev/null` for your money back.
 
 ## Build instructions
 
@@ -29,33 +40,6 @@ flit build
 Installing the built package will add the pinepass command.
 
 ## TODO
-* Add settings screen/wizard for setting up from scratch
-* Add button and screen to add/generate new passwords
-* Add support for pass-otp extension
+* Add button to generate new password on add/edit screens
+* Unify add/edit password dialogs
 * Figure out how to add .desktop file to allow opening from launchers.
-* Add screen to show all info in password file
-
-### Plan for wizard
-
-Decided not to use GtkAssistant because getting it to work with Glade was slowing me down.
-Going to try to make settings dialog cover my cases. Probably easier/more flexible for users too.
-
-Step 1 checks for existing ssh keys and offers to generate one if
-it doesn't exist.
-
-Step 2 checks for any GPG keys that have a private key for decryption.
-Offers to generate one if none exists
-
-Step 3 dumps the public keys of the selected key pairs from steps 1 & 2
-into a folder in the home directory
-
-Intermission: User distributes the public keys as needed. Would be good to have a way
-to resume to this step if user closes application and restarts.
-
-Step 4 prompts user for password repository git url and tries to clone it
-proceed to step 5 if it succeeds
-
-Step 5 checks key ids listed in password repository against the GPG keyring,
-reporting any missing or untrusted keys. Asks user to fix any and then confirm
-
-Step 6 Congratulate user
