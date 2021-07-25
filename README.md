@@ -23,6 +23,13 @@ with most Linux distros.
 * ssh-add
 * ssh-keygen
 
+Build deps:
+
+* Make
+* Flit
+* glib-compile-resources
+
+
 
 ## No Maintenance Guarantee!
 
@@ -32,8 +39,9 @@ I promise not to maintain Pine Pass. If I do maintain it, you can pipe a request
 
 Uses flit to make sdist and wheel
 
+
 ```
-flit build
+make
 
 ```
 
@@ -42,4 +50,5 @@ Installing the built package will add the pinepass command.
 ## TODO
 * Add button to generate new password on add/edit screens
 * Unify add/edit password dialogs
+* Add ability to move passwords
 * Figure out how to add .desktop file to allow opening from launchers.

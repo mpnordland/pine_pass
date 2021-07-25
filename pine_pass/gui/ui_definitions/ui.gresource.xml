@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/me/rehack/pinepass">
+    <file>prefs_dialog.ui</file>
+    <file compressed="true">main_window.ui</file>
+    <file compressed="true">password_edit_dialog.ui</file>
+    <file>ui.css</file>
+  </gresource>
+</gresources>

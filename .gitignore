@@ -138,6 +138,7 @@ dmypy.json
 cython_debug/
 
 *.glade~
+*.ui~
 
 \#ui.glade\#
 .vscode
