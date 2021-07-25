@@ -8,7 +8,7 @@ with most Linux distros.
 
 * Can search through passwords in repository and copy the password to the clipboard
 * Can display/edit passwords
-* Can insert new passwords (can't generate passwords yet!)
+* Can generate and insert new passwords
 * Has a preference screen that can handle simple repository and gpg key id management
 * Shows you the first SSH key it found or offers to generate one (only generates RSA keys right now, uses ssh-keygen)
 
@@ -48,7 +48,5 @@ make
 Installing the built package will add the pinepass command.
 
 ## TODO
-* Add button to generate new password on add/edit screens
-* Unify add/edit password dialogs
 * Add ability to move passwords
 * Figure out how to add .desktop file to allow opening from launchers.

@@ -1,16 +1,18 @@
-from gi.repository import Gtk
 from pine_pass import (
     get_respository_remote,
     get_key_ids,
     generate_ssh_keypair,
     get_ssh_pub_keys,
-    get_unused_available_gpg_keys
+    get_unused_available_gpg_keys,
+    generate_password,
 )
+
 from .background import run_background_task
 from .widgets import KeyIdRow
 
 import gi
 gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk
 
 
 @Gtk.Template(resource_path="/me/rehack/pinepass/password_edit_dialog.ui")
@@ -18,14 +20,21 @@ class PasswordEditDialog(Gtk.Dialog):
 
     __gtype_name__ = 'PasswordEditDialog'
 
-
     entry = Gtk.Template.Child('password_path')
     text_view = Gtk.Template.Child('password_entry')
     editor = Gtk.Template.Child('password_editor')
 
+    password_length = Gtk.Template.Child('password_length')
+    use_upper_alpha = Gtk.Template.Child('use_upper_alpha')
+    use_lower_alpha = Gtk.Template.Child('use_lower_alpha')
+    use_numerals = Gtk.Template.Child('use_numerals')
+    use_symbols = Gtk.Template.Child('use_symbols')
+    use_custom_symbols = Gtk.Template.Child('use_custom_symbols')
+    custom_symbol_set = Gtk.Template.Child('custom_symbol_set')
+    generated_password_display = Gtk.Template.Child(
+        'generated_password_display')
+
     def setup(self, password_path, password_entry):
-
-
         self.entry.set_text(password_path)
         self.text_view.get_buffer().set_text(password_entry)
 
@@ -35,7 +44,6 @@ class PasswordEditDialog(Gtk.Dialog):
             self.set_title(f"Editing {password_path}")
             self.entry.hide()
 
-
     def get_password_path(self):
         return self.entry.get_text()
 
@@ -44,6 +52,29 @@ class PasswordEditDialog(Gtk.Dialog):
         start = buffer.get_start_iter()
         end = buffer.get_end_iter()
         return buffer.get_text(start, end, False)
+
+    @Gtk.Template.Callback()
+    def generate_new_password(self, button):
+        length = int(self.password_length.get_text())
+        new_password = generate_password(length,
+                                         self.use_lower_alpha.get_active(),
+                                         self.use_upper_alpha.get_active(),
+                                         self.use_numerals.get_active(),
+                                         self.use_symbols.get_active(),
+                                         self.custom_symbol_set.get_text() if self.use_custom_symbols.get_active() else None)
+
+        self.generated_password_display.get_buffer().set_text(new_password)
+        self.generated_password_display.show()
+
+    @Gtk.Template.Callback()
+    def insert_generated_password(self, button):
+        generated_buffer = self.generated_password_display.get_buffer()
+        start = generated_buffer.get_start_iter()
+        end = generated_buffer.get_end_iter()
+        generated_password = generated_buffer.get_text(start, end, False)
+
+        self.text_view.get_buffer().set_text(
+            "\n".join([generated_password, self.get_password_contents()]))
 
 
 @Gtk.Template(resource_path="/me/rehack/pinepass/prefs_dialog.ui")
@@ -73,12 +104,8 @@ class PreferencesDialog(Gtk.Dialog):
 
         self.gpg_key_box.show_all()
 
-
-
         run_background_task(lambda: get_unused_available_gpg_keys(
             current_key_ids)).done(self.update_available_keys, print)
-
-
 
         self.update_ssh_widgets(get_ssh_pub_keys())
 
@@ -114,9 +141,9 @@ class PreferencesDialog(Gtk.Dialog):
             self.gpg_key_box.show_all()
             self.gpg_key_box.foreach(
                 lambda child: used_key_ids.append(child.key_id))
-            run_background_task(lambda: get_unused_available_gpg_keys(used_key_ids)).done(self.update_available_keys)
+            run_background_task(lambda: get_unused_available_gpg_keys(
+                used_key_ids)).done(self.update_available_keys)
 
-    
     def update_available_keys(self, usable_keys):
         self.available_keys.remove_all()
 
@@ -137,7 +164,6 @@ class PreferencesDialog(Gtk.Dialog):
         run_background_task(generate_ssh_keypair).done(
             lambda _: self.update_ssh_widgets(get_ssh_pub_keys()))
 
-    
     def update_ssh_widgets(self, ssh_keys):
         if ssh_keys:
             self.public_key_box.get_buffer().set_text("\n".join(ssh_keys))
@@ -147,7 +173,6 @@ class PreferencesDialog(Gtk.Dialog):
             self.public_key_box.hide()
             self.generate_ssh_key_button.show()
 
-    
     @Gtk.Template.Callback()
     def key_selected(self, list_box, row):
         self.remove_key_button.set_sensitive(True)
