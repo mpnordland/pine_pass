@@ -50,7 +50,10 @@ class MainWindow(Gtk.Window):
             for result in results:
                 row = PasswordRow(result)
                 row.set_button_callback(
-                    lambda _: self.show_password_edit(result))
+                    (lambda r:
+                     lambda _: self.show_password_edit(r)
+                    )(result)
+                )
                 self.list_box.add(row)
 
             self.list_box.show_all()
