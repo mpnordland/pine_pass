@@ -37,6 +37,14 @@ def write_password_entry(password_path, password_entry):
     subprocess.run(command, input=password_entry,
                             text=True, capture_output=True)
 
+def move_password_entry(old_path, new_path):
+    """
+    Changes locaction of password file. Will overwrite existing entries.
+    """
+    command = ["pass", "mv", "--force", old_path, new_path]
+    subprocess.run(command)
+
+
 
 def check_for_password_store():
     result = subprocess.run(["pass"], text=True, capture_output=True)

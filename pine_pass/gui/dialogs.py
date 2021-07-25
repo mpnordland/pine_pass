@@ -42,7 +42,6 @@ class PasswordEditDialog(Gtk.Dialog):
             self.set_title("New Password")
         else:
             self.set_title(f"Editing {password_path}")
-            self.entry.hide()
 
     def get_password_path(self):
         return self.entry.get_text()

@@ -1,3 +1,7 @@
+from pine_pass.indexer import index_passwords
+from .background import run_background_task
+from .dialogs import PasswordEditDialog, PreferencesDialog
+from .widgets import PasswordRow, KeyIdRow
 from pine_pass import (
     get_password,
     sync_passwords,
@@ -12,17 +16,13 @@ from pine_pass import (
     generate_ssh_keypair,
     get_password_entry,
     write_password_entry,
+    move_password_entry,
 )
 
 import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib
 
-
-from .widgets import PasswordRow, KeyIdRow
-from .dialogs import PasswordEditDialog, PreferencesDialog
-from .background import run_background_task
-from pine_pass.indexer import index_passwords
 
 @Gtk.Template(resource_path="/me/rehack/pinepass/main_window.ui")
 class MainWindow(Gtk.Window):
@@ -32,6 +32,7 @@ class MainWindow(Gtk.Window):
     list_box = Gtk.Template.Child("results_list")
     revealer = Gtk.Template.Child("revealer")
     password_label = Gtk.Template.Child("notification_password_name")
+    entry = Gtk.Template.Child("password_search")
 
     def setup(self, config):
         self._config = config
@@ -42,8 +43,11 @@ class MainWindow(Gtk.Window):
         Gtk.main_quit()
 
     @Gtk.Template.Callback("on_password_search_changed")
-    def update_search_results(self, entry):
-        results = self._index.lookup(entry.get_text())
+    def on_password_search_changed(self, entry):
+        self.update_search_results()
+
+    def update_search_results(self):
+        results = self._index.lookup(self.entry.get_text())
         if results:
             self.list_box.foreach(lambda child: self.list_box.remove(child))
 
@@ -52,7 +56,7 @@ class MainWindow(Gtk.Window):
                 row.set_button_callback(
                     (lambda r:
                      lambda _: self.show_password_edit(r)
-                    )(result)
+                     )(result)
                 )
                 self.list_box.add(row)
 
@@ -88,18 +92,38 @@ class MainWindow(Gtk.Window):
 
         dialog = PasswordEditDialog(transient_for=self)
         dialog.setup(password_path, password_entry)
+        while True:
+            response = dialog.run()
 
-        response = dialog.run()
+            if response == Gtk.ResponseType.APPLY:
+                new_password_entry = dialog.get_password_contents()
+                new_password_path = dialog.get_password_path()
 
-        if response == Gtk.ResponseType.APPLY:
-            new_password_entry = dialog.get_password_contents()
-            write_password_entry(password_path, new_password_entry)
-        else:
-            pass
+                # change detection
+                path_changed = password_path != new_password_path
+                entry_changed = password_entry != new_password_entry
+
+                def can_write_new_path():
+                    return (get_password(new_password_path) is None
+                            or self.check_if_overwrite_desired(new_password_path))
+
+                if not path_changed and entry_changed:
+                    write_password_entry(password_path, new_password_entry)
+                    break
+                elif path_changed and not entry_changed and can_write_new_path():
+                    move_password_entry(password_path, new_password_path)
+                    break
+                elif path_changed and entry_changed and can_write_new_path():
+                    move_password_entry(password_path, new_password_path)
+                    write_password_entry(new_password_path, new_password_entry)
+                    break
+            else:
+                break
 
         dialog.destroy()
+        self.reindex_passwords()
+        self.update_search_results()
 
-        
     @Gtk.Template.Callback("on_add_password_menu_item_activate")
     def add_new_password(self, menu_item):
         dialog = PasswordEditDialog(transient_for=self)
@@ -126,6 +150,8 @@ class MainWindow(Gtk.Window):
                 break
 
         dialog.destroy()
+        self.reindex_passwords()
+        self.update_search_results()
 
     def check_if_overwrite_desired(self, password_path):
 
@@ -143,7 +169,6 @@ class MainWindow(Gtk.Window):
         dialog.destroy()
 
         return response == Gtk.ResponseType.YES
-
 
     @Gtk.Template.Callback('on_prefs_menu_item_activate')
     def show_preferences(self, menu_item):

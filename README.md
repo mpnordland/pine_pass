@@ -48,5 +48,4 @@ make
 Installing the built package will add the pinepass command.
 
 ## TODO
-* Add ability to move passwords
 * Figure out how to add .desktop file to allow opening from launchers.
