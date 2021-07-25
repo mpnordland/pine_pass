@@ -13,7 +13,7 @@ $(GRESOURCE_FILE): pine_pass/gui/ui_definitions/ui.gresource.xml $(shell $(GLIB_
 resource: $(GRESOURCE_FILE)
 
 dist: resource
-	flit build
+	python -m build
 
 clean:
 	rm -r dist

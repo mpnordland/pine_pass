@@ -139,6 +139,7 @@ cython_debug/
 
 *.glade~
 *.ui~
+*.gresource
 
 \#ui.glade\#
 .vscode
