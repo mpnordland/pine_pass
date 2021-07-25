@@ -2,17 +2,22 @@
 <!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
+  <object class="GtkImage" id="image1">
+    <property name="visible">True</property>
+    <property name="can-focus">False</property>
+    <property name="stock">gtk-refresh</property>
+  </object>
   <object class="GtkMenu" id="menu1">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <child>
       <object class="GtkImageMenuItem" id="refresh_menu_item">
-        <property name="label">gtk-refresh</property>
+        <property name="label">Synchonize repository</property>
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <property name="tooltip-text" translatable="yes">Sync passwords through git and refresh UI</property>
-        <property name="use-underline">True</property>
-        <property name="use-stock">True</property>
+        <property name="image">image1</property>
+        <property name="use-stock">False</property>
         <signal name="activate" handler="on_refresh_menu_item_activate" swapped="no"/>
       </object>
     </child>
