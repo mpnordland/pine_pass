@@ -26,7 +26,7 @@ with most Linux distros.
 Build deps:
 
 * Make
-* Flit
+* setuptools
 * glib-compile-resources
 
 
@@ -37,13 +37,15 @@ I promise not to maintain Pine Pass. If I do maintain it, you can pipe a request
 
 ## Build instructions
 
-Uses flit to make sdist and wheel
+Uses setuptools to make sdist and wheel
 
 
 ```
 make
-
 ```
+
+once that finishes, you'll find a dist folder in the project root. In there will be a Python source package and a wheel.
+You can install either one (I don't think it really matters) using `pip install <name of file>`. Then you can either run `pinepass` or find it in your application menu.
 
 Installing the built package will add the pinepass command.
 
