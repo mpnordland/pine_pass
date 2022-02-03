@@ -20,6 +20,7 @@ with most Linux distros.
 * pass
 * python-gnupg
 * python-promise
+* python-build
 * ssh-add
 * ssh-keygen
 
